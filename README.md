@@ -30,7 +30,9 @@ Comprehensive documentation is available to help developers understand Monado's 
 # How to run
 
 1.Install openxr_android-outOfProcess-debug.apk installable_runtime_broker-dev-debug.apk hello_xr-OpenGLES-debug.apk
+
 2.Make sure runtime_broker and monado runtime has auto-start permissions
+
 3.Run hello_xr-OpenGLES-debug.apk
 
 # Screenshots
