@@ -3,8 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XReality Runtime - Complete XR Solution Based on Monado</title>
+    <title>XReality - Complete XR Solution Based on Monado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Titillium+Web:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #00c6ff;
+            --secondary-color: #0072ff;
+            --dark-bg: #050816;
+            --card-bg: rgba(10, 25, 47, 0.75);
+            --text-color: #e0e0e0;
+            --subtle-text-color: #a0a0a0;
+            --border-color: rgba(0, 198, 255, 0.2);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,10 +25,15 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: 'Titillium Web', sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-color);
+            background-color: var(--dark-bg);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, .logo {
+            font-family: 'Orbitron', sans-serif;
         }
 
         .container {
@@ -26,14 +44,15 @@
 
         /* Header */
         header {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(5, 8, 22, 0.5);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
         }
 
         nav {
@@ -49,12 +68,14 @@
             color: white;
             display: flex;
             align-items: center;
+            text-shadow: 0 0 10px var(--primary-color);
         }
 
         .logo::before {
             content: "🥽";
             margin-right: 0.5rem;
             font-size: 2rem;
+            filter: drop-shadow(0 0 5px var(--primary-color));
         }
 
         .nav-links {
@@ -69,24 +90,29 @@
             transition: all 0.3s ease;
             padding: 0.5rem 1rem;
             border-radius: 25px;
+            border: 1px solid transparent;
         }
 
         .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-color);
         }
 
         /* Hero Section */
         .hero {
-            padding: 120px 0 80px;
+            padding: 140px 0 100px;
             text-align: center;
             color: white;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0, 114, 255, 0.2), transparent 70%);
         }
 
         .hero h1 {
             font-size: 3.5rem;
             margin-bottom: 1rem;
-            background: linear-gradient(45deg, #fff, #f0f8ff);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -94,8 +120,8 @@
         }
 
         @keyframes glow {
-            from { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); }
-            to { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6)); }
+            from { filter: drop-shadow(0 0 10px rgba(0, 198, 255, 0.4)); }
+            to { filter: drop-shadow(0 0 25px rgba(0, 114, 255, 0.8)); }
         }
 
         .hero p {
@@ -110,32 +136,34 @@
         .cta-button {
             display: inline-block;
             padding: 15px 40px;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             color: white;
             text-decoration: none;
             border-radius: 50px;
             font-size: 1.1rem;
             font-weight: bold;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.3);
+            border: 1px solid var(--primary-color);
         }
 
         .cta-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+            box-shadow: 0 0 30px rgba(0, 198, 255, 0.6);
         }
 
         /* Features Section */
         .features {
-            background: white;
+            background: var(--dark-bg);
             padding: 100px 0;
+            position: relative;
         }
 
         .section-title {
             text-align: center;
             font-size: 2.5rem;
             margin-bottom: 3rem;
-            color: #2c3e50;
+            color: var(--text-color);
             position: relative;
         }
 
@@ -144,7 +172,7 @@
             display: block;
             width: 100px;
             height: 4px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             margin: 1rem auto;
             border-radius: 2px;
         }
@@ -157,14 +185,15 @@
         }
 
         .feature-card {
-            background: white;
+            background: var(--card-bg);
             padding: 2rem;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
         .feature-card::before {
@@ -174,34 +203,38 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            transition: all 0.3s ease;
+            opacity: 0.8;
         }
 
         .feature-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 0 40px rgba(0, 198, 255, 0.3);
+            border-color: rgba(0, 198, 255, 0.5);
         }
 
         .feature-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
             display: block;
+            filter: drop-shadow(0 0 5px var(--primary-color));
         }
 
         .feature-card h3 {
             font-size: 1.4rem;
             margin-bottom: 1rem;
-            color: #2c3e50;
+            color: var(--primary-color);
         }
 
         .feature-card p {
-            color: #666;
+            color: var(--subtle-text-color);
             line-height: 1.8;
         }
 
         /* Advantages Section */
         .advantages {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: var(--dark-bg);
             padding: 100px 0;
         }
 
@@ -215,7 +248,7 @@
         .advantages-text h2 {
             font-size: 2.5rem;
             margin-bottom: 2rem;
-            color: #2c3e50;
+            color: var(--text-color);
         }
 
         .advantage-item {
@@ -223,27 +256,28 @@
             align-items: flex-start;
             margin-bottom: 1.5rem;
             padding: 1rem;
-            background: white;
+            background: var(--card-bg);
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
 
         .advantage-item:hover {
             transform: translateX(10px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 198, 255, 0.15);
+            border-color: rgba(0, 198, 255, 0.4);
         }
 
         .advantage-icon {
             font-size: 1.5rem;
             margin-right: 1rem;
-            color: #667eea;
+            color: var(--primary-color);
         }
 
         .advantages-visual {
             position: relative;
             height: 400px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             border-radius: 20px;
             display: flex;
             align-items: center;
@@ -269,7 +303,7 @@
 
         /* Stats Section */
         .stats {
-            background: #2c3e50;
+            background: var(--dark-bg);
             color: white;
             padding: 80px 0;
         }
@@ -284,18 +318,19 @@
         .stat-item h3 {
             font-size: 3rem;
             margin-bottom: 0.5rem;
-            color: #667eea;
+            color: var(--primary-color);
             font-weight: bold;
         }
 
         .stat-item p {
             font-size: 1.1rem;
             opacity: 0.9;
+            color: var(--subtle-text-color);
         }
 
         /* Contact Section */
         .contact {
-            background: white;
+            background: var(--dark-bg);
             padding: 100px 0;
             text-align: center;
         }
@@ -308,13 +343,13 @@
         .contact h2 {
             font-size: 2.5rem;
             margin-bottom: 2rem;
-            color: #2c3e50;
+            color: var(--text-color);
         }
 
         .contact p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
-            color: #666;
+            color: var(--subtle-text-color);
         }
 
         .contact-buttons {
@@ -337,27 +372,28 @@
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             color: white;
         }
 
         .btn-secondary {
             background: transparent;
-            color: #667eea;
-            border: 2px solid #667eea;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
         }
 
         .contact-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 0 25px rgba(0, 198, 255, 0.5);
         }
 
         /* Footer */
         footer {
-            background: #2c3e50;
+            background: #000;
             color: white;
             text-align: center;
             padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
         }
 
         /* Responsive */
@@ -401,7 +437,7 @@
 <body>
     <header>
         <nav class="container">
-            <div class="logo">XReality Runtime</div>
+            <div class="logo">XReality</div>
             <ul class="nav-links">
                 <li><a href="#features">Core Features</a></li>
                 <li><a href="#advantages">Advantages</a></li>
@@ -412,7 +448,7 @@
 
     <section class="hero">
         <div class="container">
-            <h1>XReality Runtime</h1>
+            <h1>XReality</h1>
             <p>Complete XR solution based on open-source Monado engine with native OpenXR support, delivering ultra-low latency and high-precision XR experience for Android platforms</p>
             <a href="#features" class="cta-button">Explore Features</a>
         </div>
@@ -541,8 +577,8 @@
         <div class="container">
             <div class="contact-content fade-in">
                 <h2>Start Your XR Journey</h2>
-                <p>Ready to experience the next-generation XReality Runtime solution? Contact us for technical support and customization services.</p>
-                <p>Contact: <a href="mailto:xreality.cv@gmail.com" style="color: #667eea;">xreality.cv@gmail.com</a></p>
+                <p>Ready to experience the next-generation XReality solution? Contact us for technical support and customization services.</p>
+                <p>Contact: <a href="mailto:xreality.cv@gmail.com" style="color: var(--primary-color);">xreality.cv@gmail.com</a></p>
                 <div class="contact-buttons">
                     <a href="https://github.com/xreality-xr/monado-android-prebuild" class="contact-btn btn-primary">Get Started</a>
                 </div>
@@ -552,7 +588,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 XReality Runtime. Based on open-source Monado engine, empowering the XR ecosystem.</p>
+            <p>&copy; 2025 XReality. Based on open-source Monado engine, empowering the XR ecosystem.</p>
         </div>
     </footer>
 
@@ -585,19 +621,8 @@
             });
         }, observerOptions);
 
-        // Observe all fade-in elements
         document.querySelectorAll('.fade-in').forEach(el => {
             observer.observe(el);
-        });
-
-        // Header background on scroll
-        window.addEventListener('scroll', function() {
-            const header = document.querySelector('header');
-            if (window.scrollY > 100) {
-                header.style.background = 'rgba(44, 62, 80, 0.95)';
-            } else {
-                header.style.background = 'rgba(255, 255, 255, 0.1)';
-            }
         });
 
         // Add floating particles effect
@@ -605,26 +630,26 @@
             const particle = document.createElement('div');
             particle.style.cssText = `
                 position: fixed;
-                width: 4px;
-                height: 4px;
-                background: rgba(255, 255, 255, 0.6);
+                width: 3px;
+                height: 3px;
+                background: var(--primary-color);
                 border-radius: 50%;
                 pointer-events: none;
-                z-index: 1;
-                animation: float 6s linear infinite;
+                z-index: -1;
+                animation: float 10s linear infinite;
+                box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
             `;
             
             particle.style.left = Math.random() * 100 + 'vw';
-            particle.style.animationDelay = Math.random() * 6 + 's';
+            particle.style.animationDelay = Math.random() * 10 + 's';
             
             document.body.appendChild(particle);
             
             setTimeout(() => {
                 particle.remove();
-            }, 6000);
+            }, 10000);
         }
 
-        // Add CSS for particle animation
         const style = document.createElement('style');
         style.textContent = `
             @keyframes float {
@@ -636,8 +661,7 @@
         `;
         document.head.appendChild(style);
 
-        // Create particles periodically
-        setInterval(createParticle, 800);
+        setInterval(createParticle, 500);
     </script>
 </body>
 </html>
