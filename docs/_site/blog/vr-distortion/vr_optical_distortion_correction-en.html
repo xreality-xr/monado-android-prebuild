@@ -36,7 +36,7 @@
   <body>
     <div class="container-lg px-3 my-5 markdown-body">
       
-      
+      <h1><a href="http://localhost:4000/">monado-android-prebuild</a></h1>
       
 
       <h1 id="virtual-reality-vr-optical-distortion-correction">Virtual Reality (VR) Optical Distortion Correction</h1>
@@ -74,7 +74,7 @@
 <p>The distortion type labeled “<strong>F-Tan(Theta)</strong>” corresponds to a pinhole camera model where the angle θ is defined between the optical axis and a line passing through an object point, the lens center, and the image point.</p>
 
 <p>In this case, if f represents the focal length of the lens and y is the image height on the image plane, then:
-\(y = f \cdot \tan(\theta)\)</p>
+<img src="https://latex.codecogs.com/svg.latex?y%20%3D%20f%20%5Ccdot%20%5Ctan(%5Ctheta)" alt="y = f \cdot \tan(\theta)" /></p>
 
 <p>This describes an ideal pinhole camera without distortion. In real-world lenses, distortion occurs due to imperfections; it’s calculated as the difference between actual and ideal image heights.</p>
 
@@ -245,7 +245,9 @@
 </ul>
 
 <p>The Y Angle is equivalent to FOV, computed using:
-\(\theta = \arctan\left(\frac{y}{f}\right)\)</p>
+<img src="https://latex.codecogs.com/svg.latex?%5Ctheta%20%3D%20%5Carctan%5Cleft(%5Cfrac%7By%7D%7Bf%7D%5Cright)" alt="
+\theta = \arctan\left(\frac{y}{f}\right)
+" /></p>
 
 <p>Accurate FOV ensures that movement doesn’t cause stretching or deformation effects in the rendered view.</p>
 
@@ -309,13 +311,13 @@
 <h3 id="coordinate-transformation-logic">Coordinate Transformation Logic</h3>
 
 <p>Screen dimensions are transformed into <strong>tan-angle</strong> space:
-\(\tan(\text{angle}) = \frac{\text{distance}}{\text{lens distance}}\)</p>
+<img src="https://latex.codecogs.com/svg.latex?%5Ctan(%5Ctext%7Bangle%7D)%20%3D%20%5Cfrac%7B%5Ctext%7Bdistance%7D%7D%7B%5Ctext%7Blens%20distance%7D%7D" alt="\tan(\text{angle}) = \frac{\text{distance}}{\text{lens distance}}" /></p>
 
 <p>These transformations simplify handling of distorted coordinates while reducing math complexity.</p>
 
 <p>Final texture parameters (offsets and sizes) are computed from fov values:
-\(\text{size.x} = \tan(-\text{angle\_left}) + \tan(\text{angle\_right})\)
-\(\text{offset.x} = \tan(-\text{angle\_left})\)</p>
+<img src="https://latex.codecogs.com/svg.latex?%5Ctext%7Bsize.x%7D%20%3D%20%5Ctan(-%5Ctext%7Bangle%5C_left%7D)%20%2B%20%5Ctan(%5Ctext%7Bangle%5C_right%7D)" alt="\text{size.x} = \tan(-\text{angle_left}) + \tan(\text{angle_right})" />
+<img src="https://latex.codecogs.com/svg.latex?%5Ctext%7Boffset.x%7D%20%3D%20%5Ctan(-%5Ctext%7Bangle%5C_left%7D)" alt="\text{offset.x} = \tan(-\text{angle_left})" /></p>
 
 <p>Similarly for Y-axis components.</p>
 
@@ -343,7 +345,7 @@
 <ul>
   <li>Converted into <strong>tan-angle space</strong></li>
   <li>Then squared, scaled by distortion factors using polynomial approximation:
-\(\text{fact} = 1 + k_0 \cdot x^2 + k_1 \cdot x^4 + ...\)</li>
+<img src="https://latex.codecogs.com/svg.latex?\text{fact}%20%3D%201%20%2B%20k_0%20\cdot%20x^2%20%2B%20k_1%20\cdot%20x^4%20%2B%20..." alt="\text{fact} = 1 + k_0 \cdot x^2 + k_1 \cdot x^4 + ..." /></li>
 </ul>
 
 <p>After fact computation, it’s applied back to transform the UV coordinates.</p>

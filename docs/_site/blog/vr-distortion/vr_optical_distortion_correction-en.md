@@ -31,9 +31,7 @@ Distortion correction is generally achieved using distortion data provided by th
 The distortion type labeled "**F-Tan(Theta)**" corresponds to a pinhole camera model where the angle θ is defined between the optical axis and a line passing through an object point, the lens center, and the image point.
 
 In this case, if f represents the focal length of the lens and y is the image height on the image plane, then:
-$$
-y = f \cdot \tan(\theta)
-$$
+![y = f \cdot \tan(\theta)](https://latex.codecogs.com/svg.latex?y%20%3D%20f%20%5Ccdot%20%5Ctan(%5Ctheta))
 
 This describes an ideal pinhole camera without distortion. In real-world lenses, distortion occurs due to imperfections; it's calculated as the difference between actual and ideal image heights.
 
@@ -64,9 +62,9 @@ This describes an ideal pinhole camera without distortion. In real-world lenses,
 - **D**: Distance from lens center to virtual image plane
 
 The Y Angle is equivalent to FOV, computed using:
-$$
+![
 \theta = \arctan\left(\frac{y}{f}\right)
-$$
+](https://latex.codecogs.com/svg.latex?%5Ctheta%20%3D%20%5Carctan%5Cleft(%5Cfrac%7By%7D%7Bf%7D%5Cright))
 
 Accurate FOV ensures that movement doesn’t cause stretching or deformation effects in the rendered view.
 
@@ -130,19 +128,13 @@ This sets up the screen and texture coordinate conversions and handles the disto
 ### Coordinate Transformation Logic
 
 Screen dimensions are transformed into **tan-angle** space:
-$$
-\tan(\text{angle}) = \frac{\text{distance}}{\text{lens distance}}
-$$
+![\tan(\text{angle}) = \frac{\text{distance}}{\text{lens distance}}](https://latex.codecogs.com/svg.latex?%5Ctan(%5Ctext%7Bangle%7D)%20%3D%20%5Cfrac%7B%5Ctext%7Bdistance%7D%7D%7B%5Ctext%7Blens%20distance%7D%7D)
 
 These transformations simplify handling of distorted coordinates while reducing math complexity.
 
 Final texture parameters (offsets and sizes) are computed from fov values:
-$$
-\text{size.x} = \tan(-\text{angle\_left}) + \tan(\text{angle\_right})
-$$
-$$
-\text{offset.x} = \tan(-\text{angle\_left})
-$$
+![\text{size.x} = \tan(-\text{angle_left}) + \tan(\text{angle_right})](https://latex.codecogs.com/svg.latex?%5Ctext%7Bsize.x%7D%20%3D%20%5Ctan(-%5Ctext%7Bangle%5C_left%7D)%20%2B%20%5Ctan(%5Ctext%7Bangle%5C_right%7D))
+![\text{offset.x} = \tan(-\text{angle_left})](https://latex.codecogs.com/svg.latex?%5Ctext%7Boffset.x%7D%20%3D%20%5Ctan(-%5Ctext%7Bangle%5C_left%7D))
 
 Similarly for Y-axis components.
 
@@ -170,9 +162,7 @@ The function `u_compute_distortion_cardboard()` defines how the distorted mesh c
 Input UV values (range: 0–1):
 - Converted into **tan-angle space**
 - Then squared, scaled by distortion factors using polynomial approximation:
-$$
-\text{fact} = 1 + k_0 \cdot x^2 + k_1 \cdot x^4 + ...
-$$
+![\text{fact} = 1 + k_0 \cdot x^2 + k_1 \cdot x^4 + ...](https://latex.codecogs.com/svg.latex?\text{fact}%20%3D%201%20%2B%20k_0%20\cdot%20x^2%20%2B%20k_1%20\cdot%20x^4%20%2B%20...)
 
 After fact computation, it’s applied back to transform the UV coordinates.
 
