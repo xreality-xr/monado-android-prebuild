@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - XReality</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">XReality</div>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="index.html" data-i18n-key="nav_home">Home</a></li>
+                    <li><a href="blog.html" data-i18n-key="nav_blog">Blog</a></li>
+                </ul>
+                <div class="lang-switch">
+                    <button class="lang-switch-button" data-i18n-key="lang_switch">Language</button>
+                    <div class="lang-dropdown">
+                        <a href="#" id="lang-en">English</a>
+                        <a href="#" id="lang-zh">中文</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="blog-page-container" style="padding-top: 100px;">
+        <aside class="sidebar">
+            <h2 data-i18n-key="nav_blog">Blog</h2>
+            <ul id="blog-list"></ul>
+        </aside>
+        <main class="blog-content" id="blog-content">
+            <!-- Blog content will be loaded here -->
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 XReality. Based on open-source Monado engine, empowering the XR ecosystem.</p>
+        </div>
+    </footer>
+
+    <script src="js/i18n.js"></script>
+    
+    <script src="js/blog.js"></script>
+</body>
+</html>

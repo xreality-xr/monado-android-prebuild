@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Virtual Reality (VR) Optical Distortion Correction | monado-android-prebuild</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Virtual Reality (VR) Optical Distortion Correction" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="http://localhost:4000/blog/vr-distortion/vr_optical_distortion_correction-en.html" />
+<meta property="og:url" content="http://localhost:4000/blog/vr-distortion/vr_optical_distortion_correction-en.html" />
+<meta property="og:site_name" content="monado-android-prebuild" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Virtual Reality (VR) Optical Distortion Correction" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","headline":"Virtual Reality (VR) Optical Distortion Correction","url":"http://localhost:4000/blog/vr-distortion/vr_optical_distortion_correction-en.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=1d4aaae72de016627583918d037cd4c4d4cb6a14">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      
+      
+
+      <h1 id="virtual-reality-vr-optical-distortion-correction">Virtual Reality (VR) Optical Distortion Correction</h1>
+
+<p>VR optical distortion correction is one of the core technologies for VR head-mounted display manufacturers. Good correction results in a distortion-free image, and when the user moves their head, there is no twisting or deformation of the scene — essential for enhancing immersive experiences in VR.</p>
+
+<p>This article will provide detailed explanations on several key questions related to VR distortion correction:</p>
+
+<ol>
+  <li><strong>How is optical distortion correction done in VR?</strong></li>
+  <li><strong>Are the optical FOV and rendered FOV the same? How do you calculate FOV and frustum?</strong></li>
+  <li><strong>When should you use pincushion distortion, and when should you apply barrel distortion for pre-distortion correction?</strong></li>
+  <li><strong>How is the size of the displayed image adjusted to ensure it fills the entire screen?</strong></li>
+  <li><strong>What is Tan-Angle, and what are its practical uses?</strong></li>
+</ol>
+
+<hr />
+
+<h2 id="overview-of-vr-optical-distortion">Overview of VR Optical Distortion</h2>
+
+<p>To achieve near-eye imaging, most VR glasses use optical lenses to increase the effective image distance. However, since most lenses introduce distortion, the resulting visual output appears distorted in a pincushion fashion (as shown below).</p>
+
+<p><img src="/blog/vr-distortion/image01.jpg" alt="Image 1: Displayed Image on Screen vs. Image Seen by Eye" /></p>
+
+<p>To eliminate the pincushion distortion caused by the lens, VR headsets perform <strong>distortion correction</strong> — typically by pre-distorting the image on the screen into a barrel-like shape such that it cancels out the lens-induced pincushion effect:</p>
+
+<p><img src="/blog/vr-distortion/image02.jpg" alt="Image 2: Pre-Distorted Image vs. Final Eye View" /></p>
+
+<p>Distortion correction is generally achieved using distortion data provided by the lens manufacturer. These parameters can be derived through simulation tools like Zemax, with data formats often structured as follows.</p>
+
+<hr />
+
+<h3 id="f-tantheta-distortion-model">F-Tan(Theta) Distortion Model</h3>
+
+<p>The distortion type labeled “<strong>F-Tan(Theta)</strong>” corresponds to a pinhole camera model where the angle θ is defined between the optical axis and a line passing through an object point, the lens center, and the image point.</p>
+
+<p>In this case, if f represents the focal length of the lens and y is the image height on the image plane, then:
+\(y = f \cdot \tan(\theta)\)</p>
+
+<p>This describes an ideal pinhole camera without distortion. In real-world lenses, distortion occurs due to imperfections; it’s calculated as the difference between actual and ideal image heights.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Y Angle (deg)</th>
+      <th>Tan Shift</th>
+      <th>Sag Shift</th>
+      <th>Real Height</th>
+      <th>Ref. Height</th>
+      <th>Distortion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>-0.0744271</td>
+      <td>-0.0744271</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0%</td>
+    </tr>
+    <tr>
+      <td>0.45</td>
+      <td>-0.07432524</td>
+      <td>-0.0742736</td>
+      <td>0.19616753</td>
+      <td>0.19617283</td>
+      <td>-0.0027%</td>
+    </tr>
+    <tr>
+      <td>0.9</td>
+      <td>-0.07403927</td>
+      <td>-0.0738131</td>
+      <td>0.39232744</td>
+      <td>0.39236987</td>
+      <td>-0.01081%</td>
+    </tr>
+    <tr>
+      <td>1.35</td>
+      <td>-0.07356891</td>
+      <td>-0.0730455</td>
+      <td>0.58847211</td>
+      <td>0.58861533</td>
+      <td>-0.02433%</td>
+    </tr>
+    <tr>
+      <td>1.8</td>
+      <td>-0.07291369</td>
+      <td>-0.0719707</td>
+      <td>0.78459392</td>
+      <td>0.78493345</td>
+      <td>-0.04326%</td>
+    </tr>
+    <tr>
+      <td>2.25</td>
+      <td>-0.07207295</td>
+      <td>-0.0705885</td>
+      <td>0.98068525</td>
+      <td>0.98134851</td>
+      <td>-0.06759%</td>
+    </tr>
+    <tr>
+      <td>2.7</td>
+      <td>-0.07104585</td>
+      <td>-0.0688987</td>
+      <td>1.17673846</td>
+      <td>1.17788483</td>
+      <td>-0.09732%</td>
+    </tr>
+    <tr>
+      <td>3.15</td>
+      <td>-0.06983135</td>
+      <td>-0.0669009</td>
+      <td>1.37274592</td>
+      <td>1.37456679</td>
+      <td>-0.13247%</td>
+    </tr>
+    <tr>
+      <td>3.6</td>
+      <td>-0.06842822</td>
+      <td>-0.064595</td>
+      <td>1.56869998</td>
+      <td>1.57141885</td>
+      <td>-0.17302%</td>
+    </tr>
+    <tr>
+      <td>4.05</td>
+      <td>-0.06683507</td>
+      <td>-0.0619804</td>
+      <td>1.76459302</td>
+      <td>1.76846556</td>
+      <td>-0.21898%</td>
+    </tr>
+    <tr>
+      <td>4.5</td>
+      <td>-0.06505028</td>
+      <td>-0.0590568</td>
+      <td>1.96041736</td>
+      <td>1.96573154</td>
+      <td>-0.27034%</td>
+    </tr>
+    <tr>
+      <td>4.95</td>
+      <td>-0.06307207</td>
+      <td>-0.0558237</td>
+      <td>2.15616535</td>
+      <td>2.16324155</td>
+      <td>-0.32711%</td>
+    </tr>
+    <tr>
+      <td>5.4</td>
+      <td>-0.06089847</td>
+      <td>-0.0522806</td>
+      <td>2.35182932</td>
+      <td>2.36102045</td>
+      <td>-0.38929%</td>
+    </tr>
+    <tr>
+      <td>5.85</td>
+      <td>-0.05852734</td>
+      <td>-0.0484269</td>
+      <td>2.54740158</td>
+      <td>2.55909324</td>
+      <td>-0.45687%</td>
+    </tr>
+    <tr>
+      <td>6.3</td>
+      <td>-0.05595633</td>
+      <td>-0.044262</td>
+      <td>2.74287444</td>
+      <td>2.75748508</td>
+      <td>-0.52985%</td>
+    </tr>
+    <tr>
+      <td>6.75</td>
+      <td>-0.05318293</td>
+      <td>-0.0397852</td>
+      <td>2.9382402</td>
+      <td>2.95622127</td>
+      <td>-0.60825%</td>
+    </tr>
+    <tr>
+      <td>7.2</td>
+      <td>-0.05020443</td>
+      <td>-0.0349959</td>
+      <td>3.13349114</td>
+      <td>3.1553273</td>
+      <td>-0.69204%</td>
+    </tr>
+    <tr>
+      <td>7.65</td>
+      <td>-0.04701796</td>
+      <td>-0.0298933</td>
+      <td>3.32861953</td>
+      <td>3.35482882</td>
+      <td>-0.78124%</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li><strong>Real Height (h)</strong>: The real object height.</li>
+  <li><strong>Reference Height (y)</strong>: The distorted height.</li>
+  <li><strong>H</strong>: Virtual image height</li>
+  <li><strong>D</strong>: Distance from lens center to virtual image plane</li>
+</ul>
+
+<p>The Y Angle is equivalent to FOV, computed using:
+\(\theta = \arctan\left(\frac{y}{f}\right)\)</p>
+
+<p>Accurate FOV ensures that movement doesn’t cause stretching or deformation effects in the rendered view.</p>
+
+<hr />
+
+<h2 id="implementation-example-using-monado-openxr-runtime">Implementation Example Using Monado OpenXR Runtime</h2>
+
+<p>Open source VR runtime <a href="https://monado.dev/">Monado</a> implements distortion correction using algorithms inspired by Google Cardboard and Oculus’s OVR SDK. The implementation efficiently handles image scaling to ensure full-screen coverage.</p>
+
+<h3 id="key-parameters-used-in-initialization">Key Parameters Used in Initialization:</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">w_pixels</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="n">width_pixels</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">h_pixels</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="n">height_pixels</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">ppi</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="n">density_dpi</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="kt">float</span> <span class="n">angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">698132</span><span class="p">;</span> <span class="c1">// 40 degrees in radians</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">w_meters</span> <span class="o">=</span> <span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="n">w_pixels</span> <span class="o">/</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="n">ppi</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mo">0254</span><span class="n">f</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">h_meters</span> <span class="o">=</span> <span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="n">h_pixels</span> <span class="o">/</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="n">ppi</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mo">0254</span><span class="n">f</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">u_cardboard_distortion_arguments</span> <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">.</span><span class="n">distortion_k</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">.</span><span class="mi">3498</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">7001</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="n">f</span><span class="p">},</span>
+    <span class="p">.</span><span class="n">screen</span> <span class="o">=</span>
+        <span class="p">{</span>
+            <span class="p">.</span><span class="n">w_pixels</span> <span class="o">=</span> <span class="n">w_pixels</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">h_pixels</span> <span class="o">=</span> <span class="n">h_pixels</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">w_meters</span> <span class="o">=</span> <span class="n">w_meters</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">h_meters</span> <span class="o">=</span> <span class="n">h_meters</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">.</span><span class="n">inter_lens_distance_meters</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mo">03</span><span class="mi">84</span><span class="n">f</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">lens_y_center_on_screen_meters</span> <span class="o">=</span> <span class="n">h_meters</span> <span class="o">/</span> <span class="mi">2</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">screen_to_lens_distance_meters</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mo">02362</span><span class="mi">998</span><span class="n">f</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">fov</span> <span class="o">=</span>
+        <span class="p">{</span>
+            <span class="p">.</span><span class="n">angle_left</span> <span class="o">=</span> <span class="o">-</span><span class="n">angle</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">angle_right</span> <span class="o">=</span> <span class="n">angle</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">angle_up</span> <span class="o">=</span> <span class="n">angle</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">angle_down</span> <span class="o">=</span> <span class="o">-</span><span class="n">angle</span><span class="p">,</span>
+        <span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>In the structure above:</p>
+<ul>
+  <li>The <code class="language-plaintext highlighter-rouge">.distortion_k</code> values are distortion coefficients obtained from optimization or provided by the lens manufacturer.</li>
+  <li><code class="language-plaintext highlighter-rouge">screen_to_lens_distance_meters</code>: Distance from screen to lens — usually given by the optical module vendor.</li>
+  <li>FOV angles define the region of interest.</li>
+</ul>
+
+<p>These parameters are passed into the following function for further processing:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span>
+<span class="n">u_distortion_cardboard_calculate</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">u_cardboard_distortion_arguments</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                                 <span class="k">struct</span> <span class="n">xrt_hmd_parts</span> <span class="o">*</span><span class="n">parts</span><span class="p">,</span>
+                                 <span class="k">struct</span> <span class="n">u_cardboard_distortion</span> <span class="o">*</span><span class="n">out_dist</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This sets up the screen and texture coordinate conversions and handles the distortion correction logic.</p>
+
+<hr />
+
+<h3 id="coordinate-transformation-logic">Coordinate Transformation Logic</h3>
+
+<p>Screen dimensions are transformed into <strong>tan-angle</strong> space:
+\(\tan(\text{angle}) = \frac{\text{distance}}{\text{lens distance}}\)</p>
+
+<p>These transformations simplify handling of distorted coordinates while reducing math complexity.</p>
+
+<p>Final texture parameters (offsets and sizes) are computed from fov values:
+\(\text{size.x} = \tan(-\text{angle\_left}) + \tan(\text{angle\_right})\)
+\(\text{offset.x} = \tan(-\text{angle\_left})\)</p>
+
+<p>Similarly for Y-axis components.</p>
+
+<p>This leads to:</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Transform UV coordinates to tan-angle space</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">x</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">y</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">x</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">y</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+
+<span class="c1">// Texture coordinates</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_left</span><span class="p">)</span> <span class="o">+</span> <span class="n">tanf</span><span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_right</span><span class="p">);</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_up</span><span class="p">)</span> <span class="o">+</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_down</span><span class="p">);</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_left</span><span class="p">);</span>
+<span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_down</span><span class="p">);</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="pre-distortion-calculation">Pre-Distortion Calculation</h3>
+
+<p>The function <code class="language-plaintext highlighter-rouge">u_compute_distortion_cardboard()</code> defines how the distorted mesh coordinates are calculated based on the input texture UV and distortion data.</p>
+
+<p>Input UV values (range: 0–1):</p>
+<ul>
+  <li>Converted into <strong>tan-angle space</strong></li>
+  <li>Then squared, scaled by distortion factors using polynomial approximation:
+\(\text{fact} = 1 + k_0 \cdot x^2 + k_1 \cdot x^4 + ...\)</li>
+</ul>
+
+<p>After fact computation, it’s applied back to transform the UV coordinates.</p>
+
+<p>Resulting pre-distorted UVs are re-normalized and returned for rendering.</p>
+
+<hr />
+
+<h2 id="additional-notes-on-distortion-tuning">Additional Notes on Distortion Tuning</h2>
+
+<p>Distortion tuning is a complex process requiring both theoretical knowledge and practical experience. It involves adjusting distortion parameters until visual results match design goals.</p>
+
+<p>Sometimes the provided lens data may not be accurate; therefore, one needs to distinguish between optical limitations and software tuning issues.</p>
+
+<p>Depending on platform and algorithm, developers might choose either <strong>pincushion correction</strong> or <strong>barrel distortion correction</strong>, but both aim at the same goal – compensating for optical distortion.</p>
+
+<p>Examples of distortion types used during development:</p>
+<ul>
+  <li>Barrel distortion (used in pre-distortion)</li>
+  <li>Pincushion distortion (inverse of barrel)</li>
+</ul>
+
+<p>These transformations are interconvertible and can be applied depending on use-case and platform compatibility.</p>
+
+<p>Below is an example graphic showing various mesh graphics from tuning:</p>
+
+<p><img src="/blog/vr-distortion/image04.gif" alt="Mesh Examples: Barrel, Pincushion, and Conversion" /></p>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>VR distortion correction plays a critical role in providing a comfortable and visually correct experience. The implementation involves precise handling of geometric transformations and distortion models derived from physical optics.</p>
+
+<p>While open-source implementations like <strong>Monado</strong> offer elegant and clean codebases for educational and reference purposes, commercial solutions often vary significantly based on specific hardware integration and OEM preferences (e.g., Qualcomm’s mesh-based approach allows customization by vendors).</p>
+
+<p>Mastering the principles behind optical distortion correction — whether via pincushion or barrel models — enables developers to build robust and high-quality VR systems with minimal performance penalty.</p>
+
+
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>

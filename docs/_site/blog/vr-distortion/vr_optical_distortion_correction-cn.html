@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>VR光学畸变校正 | monado-android-prebuild</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="VR光学畸变校正" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="http://localhost:4000/blog/vr-distortion/vr_optical_distortion_correction-cn.html" />
+<meta property="og:url" content="http://localhost:4000/blog/vr-distortion/vr_optical_distortion_correction-cn.html" />
+<meta property="og:site_name" content="monado-android-prebuild" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="VR光学畸变校正" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","headline":"VR光学畸变校正","url":"http://localhost:4000/blog/vr-distortion/vr_optical_distortion_correction-cn.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=1d4aaae72de016627583918d037cd4c4d4cb6a14">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      
+      
+
+      <h1 id="vr光学畸变校正">VR光学畸变校正</h1>
+
+<p>VR虚拟现实光学畸变校正是VR头显厂家的核心技术之一，好的校正画面无畸变，转头时画面不会有扭动和变形，是VR提升沉浸感的关键点。本文就下面问题对VR畸变校正做了详细的阐述，可以了解其中的一些知识点：</p>
+
+<ol>
+  <li>
+    <p><strong>VR光学畸变校正是怎么做的？</strong></p>
+  </li>
+  <li>
+    <p><strong>光学FOV和渲染FOV是一样的吗？FOV怎么计算？Frustum怎么计算？</strong></p>
+  </li>
+  <li>
+    <p><strong>畸变预校正什么时候该用枕形，什么时候该用桶形？</strong></p>
+  </li>
+  <li>
+    <p><strong>显示画面的大小如何调整，怎么样让画面铺满整个屏幕？</strong></p>
+  </li>
+  <li>
+    <p><strong>Tan-Angle是什么，有什么用处？</strong></p>
+  </li>
+</ol>
+
+<p>VR眼镜为了实现近眼成像，一般使用光学透镜来增加成像距离，但由于大部分透镜都存在畸变，会导致看到的画面呈枕形，如下图所示：</p>
+
+<p><img src="/blog/vr-distortion/image01.jpg" alt="图1 屏幕显示的画面（左）和眼睛看到的画面（右）" /></p>
+
+<p>为了消除透镜带来的枕形畸变，VR眼镜厂家都会做畸变校正，即预先将屏幕显示的画面校正为桶形，用以抵消透镜所产生的枕形畸变，如下图所示：</p>
+
+<p><img src="/blog/vr-distortion/image02.jpg" alt="图2 预畸变的图像（左）和眼睛看到的画面（右）" /></p>
+
+<p>畸变校正一般是通过光学透镜厂家提供的畸变数据来实现。通过Zmax仿真可以得出光学畸变参数，其格式如下表所示：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Y Angle (deg)</th>
+      <th>Tan Shift</th>
+      <th>Sag Shift</th>
+      <th>Real Height</th>
+      <th>Ref. Height</th>
+      <th>Distortion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>-0.0744271</td>
+      <td>-0.0744271</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0%</td>
+    </tr>
+    <tr>
+      <td>0.45</td>
+      <td>-0.07432524</td>
+      <td>-0.0742736</td>
+      <td>0.19616753</td>
+      <td>0.19617283</td>
+      <td>-0.0027%</td>
+    </tr>
+    <tr>
+      <td>0.9</td>
+      <td>-0.07403927</td>
+      <td>-0.0738131</td>
+      <td>0.39232744</td>
+      <td>0.39236987</td>
+      <td>-0.01081%</td>
+    </tr>
+    <tr>
+      <td>1.35</td>
+      <td>-0.07356891</td>
+      <td>-0.0730455</td>
+      <td>0.58847211</td>
+      <td>0.58861533</td>
+      <td>-0.02433%</td>
+    </tr>
+    <tr>
+      <td>1.8</td>
+      <td>-0.07291369</td>
+      <td>-0.0719707</td>
+      <td>0.78459392</td>
+      <td>0.78493345</td>
+      <td>-0.04326%</td>
+    </tr>
+    <tr>
+      <td>2.25</td>
+      <td>-0.07207295</td>
+      <td>-0.0705885</td>
+      <td>0.98068525</td>
+      <td>0.98134851</td>
+      <td>-0.06759%</td>
+    </tr>
+    <tr>
+      <td>2.7</td>
+      <td>-0.07104585</td>
+      <td>-0.0688987</td>
+      <td>1.17673846</td>
+      <td>1.17788483</td>
+      <td>-0.09732%</td>
+    </tr>
+    <tr>
+      <td>3.15</td>
+      <td>-0.06983135</td>
+      <td>-0.0669009</td>
+      <td>1.37274592</td>
+      <td>1.37456679</td>
+      <td>-0.13247%</td>
+    </tr>
+    <tr>
+      <td>3.6</td>
+      <td>-0.06842822</td>
+      <td>-0.064595</td>
+      <td>1.56869998</td>
+      <td>1.57141885</td>
+      <td>-0.17302%</td>
+    </tr>
+    <tr>
+      <td>4.05</td>
+      <td>-0.06683507</td>
+      <td>-0.0619804</td>
+      <td>1.76459302</td>
+      <td>1.76846556</td>
+      <td>-0.21898%</td>
+    </tr>
+    <tr>
+      <td>4.5</td>
+      <td>-0.06505028</td>
+      <td>-0.0590568</td>
+      <td>1.96041736</td>
+      <td>1.96573154</td>
+      <td>-0.27034%</td>
+    </tr>
+    <tr>
+      <td>4.95</td>
+      <td>-0.06307207</td>
+      <td>-0.0558237</td>
+      <td>2.15616535</td>
+      <td>2.16324155</td>
+      <td>-0.32711%</td>
+    </tr>
+    <tr>
+      <td>5.4</td>
+      <td>-0.06089847</td>
+      <td>-0.0522806</td>
+      <td>2.35182932</td>
+      <td>2.36102045</td>
+      <td>-0.38929%</td>
+    </tr>
+    <tr>
+      <td>5.85</td>
+      <td>-0.05852734</td>
+      <td>-0.0484269</td>
+      <td>2.54740158</td>
+      <td>2.55909324</td>
+      <td>-0.45687%</td>
+    </tr>
+    <tr>
+      <td>6.3</td>
+      <td>-0.05595633</td>
+      <td>-0.044262</td>
+      <td>2.74287444</td>
+      <td>2.75748508</td>
+      <td>-0.52985%</td>
+    </tr>
+    <tr>
+      <td>6.75</td>
+      <td>-0.05318293</td>
+      <td>-0.0397852</td>
+      <td>2.9382402</td>
+      <td>2.95622127</td>
+      <td>-0.60825%</td>
+    </tr>
+    <tr>
+      <td>7.2</td>
+      <td>-0.05020443</td>
+      <td>-0.0349959</td>
+      <td>3.13349114</td>
+      <td>3.1553273</td>
+      <td>-0.69204%</td>
+    </tr>
+    <tr>
+      <td>7.65</td>
+      <td>-0.04701796</td>
+      <td>-0.0298933</td>
+      <td>3.32861953</td>
+      <td>3.35482882</td>
+      <td>-0.78124%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>表格中畸变类型是F-Tan(Theta)，其代表意义类似针孔相机，我们将光轴和穿过物点、透镜中心和像点的线之间的角度定义为θ。如果从针孔到图像平面的距离是f，那么图像高度y由y=f<em>tan（θ）给出。针孔透镜是无失真的，所以这个方程总是成立的。在实际的透镜是存在失真，失真被定义为实际图像高度和根据y=f</em>tan（θ）计算的理想图像高度之间的差。</p>
+
+<p>表格中的Real Height可以对应到下图的h，即实际的物体高度。Ref. Height则是畸变后的高度，对应下图中y。其中H和D分别为虚像高和虚像距离。</p>
+
+<p>表格中的Y Angle就是FOV了，可以通过公式θ=atan(y/f)计算得到，注意FOV在VR显示中非常重要，准确的FOV才能保证画面在转动的时候不会出现拉扯和变形。</p>
+
+<p><img src="/blog/vr-distortion/image03.png" alt="图3 F-Tan(Theata)畸变模型" /></p>
+
+<p>由于每家厂商可能有自己的畸变校正算法，笔者就以开源的Monado OpenXR Runtime为例，实际看看畸变校正是如何完成的。Monado在Android平台上是使用google cardboard的畸变校正算法的，cardboard畸变校正算法是比较完善的，其核心原理类似于oculus最早开源的ovr sdk的畸变校正算法，能很好的处理图像缩放问题，保证画面能铺满整个屏幕。</p>
+
+<p>下面这段代码是Monado初始化畸变参数结构体的部分，这里有几个重要参数。首先是angle参数，这个是FOV的一半，要根据实际的FOV来赋值。屏幕参数一般可以自己计算，通过屏幕像素和ppi可以计算出屏幕的以米为单位的宽和高等。畸变系数需要根据光学厂家给出的畸变参数来拟合，cardboard的拟合多项式为fact = 1 + k0  x^2 + k1 * x^4 + …</p>
+
+<p>screen_to_lens_distance_meters是屏幕到镜片的距离，一般可以由光学模组厂商给出来。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">w_pixels</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="n">width_pixels</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">h_pixels</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="n">height_pixels</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">ppi</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="n">density_dpi</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="kt">float</span> <span class="n">angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">698132</span><span class="p">;</span> <span class="c1">// 40Deg in rads</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">w_meters</span> <span class="o">=</span> <span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="n">w_pixels</span> <span class="o">/</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="n">ppi</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mo">0254</span><span class="n">f</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">h_meters</span> <span class="o">=</span> <span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="n">h_pixels</span> <span class="o">/</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="n">ppi</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mo">0254</span><span class="n">f</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">u_cardboard_distortion_arguments</span> <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">.</span><span class="n">distortion_k</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">.</span><span class="mi">3498</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">7001</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="n">f</span><span class="p">},</span>
+    <span class="p">.</span><span class="n">screen</span> <span class="o">=</span>
+        <span class="p">{</span>
+            <span class="p">.</span><span class="n">w_pixels</span> <span class="o">=</span> <span class="n">w_pixels</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">h_pixels</span> <span class="o">=</span> <span class="n">h_pixels</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">w_meters</span> <span class="o">=</span> <span class="n">w_meters</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">h_meters</span> <span class="o">=</span> <span class="n">h_meters</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">.</span><span class="n">inter_lens_distance_meters</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mo">03</span><span class="mi">84</span><span class="n">f</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">lens_y_center_on_screen_meters</span> <span class="o">=</span> <span class="n">h_meters</span> <span class="o">/</span> <span class="mi">2</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">screen_to_lens_distance_meters</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mo">02362</span><span class="mi">998</span><span class="n">f</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">fov</span> <span class="o">=</span>
+        <span class="p">{</span>
+            <span class="p">.</span><span class="n">angle_left</span> <span class="o">=</span> <span class="o">-</span><span class="n">angle</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">angle_right</span> <span class="o">=</span> <span class="n">angle</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">angle_up</span> <span class="o">=</span> <span class="n">angle</span><span class="p">,</span>
+            <span class="p">.</span><span class="n">angle_down</span> <span class="o">=</span> <span class="o">-</span><span class="n">angle</span><span class="p">,</span>
+        <span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>畸变参数初始化后，会传到u_distortion_cardboard_calculate函数中进一步计算畸变所需要的参数。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span>
+<span class="nf">u_distortion_cardboard_calculate</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">u_cardboard_distortion_arguments</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                                 <span class="k">struct</span> <span class="n">xrt_hmd_parts</span> <span class="o">*</span><span class="n">parts</span><span class="p">,</span>
+                                 <span class="k">struct</span> <span class="n">u_cardboard_distortion</span> <span class="o">*</span><span class="n">out_dist</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint32_t</span> <span class="n">w_pixels</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen</span><span class="p">.</span><span class="n">w_pixels</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="kt">uint32_t</span> <span class="n">h_pixels</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen</span><span class="p">.</span><span class="n">h_pixels</span><span class="p">;</span>
+    <span class="c1">// Use the full screen.</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">screens</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">w_pixels</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen</span><span class="p">.</span><span class="n">w_pixels</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">screens</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">h_pixels</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen</span><span class="p">.</span><span class="n">h_pixels</span><span class="p">;</span>
+
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">viewport</span><span class="p">.</span><span class="n">x_pixels</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">viewport</span><span class="p">.</span><span class="n">y_pixels</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">viewport</span><span class="p">.</span><span class="n">w_pixels</span> <span class="o">=</span> <span class="n">w_pixels</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">viewport</span><span class="p">.</span><span class="n">h_pixels</span> <span class="o">=</span> <span class="n">h_pixels</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">display</span><span class="p">.</span><span class="n">w_pixels</span> <span class="o">=</span> <span class="n">w_pixels</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">display</span><span class="p">.</span><span class="n">h_pixels</span> <span class="o">=</span> <span class="n">h_pixels</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">rot</span> <span class="o">=</span> <span class="n">u_device_rotation_ident</span><span class="p">;</span>
+    <span class="n">parts</span><span class="o">-&gt;</span><span class="n">distortion</span><span class="p">.</span><span class="n">fov</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">;</span>
+
+    <span class="c1">// screen.size和offset参数比较重要，是转换uv坐标到屏幕空间的关键。</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen</span><span class="p">.</span><span class="n">w_meters</span><span class="p">;</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen</span><span class="p">.</span><span class="n">h_meters</span><span class="p">;</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">screen</span><span class="p">.</span><span class="n">w_meters</span> <span class="o">-</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">inter_lens_distance_meters</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">;</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">lens_y_center_on_screen_meters</span><span class="p">;</span>
+
+    <span class="c1">// 将screen尺寸转换到tanangle坐标，tanangle将屏幕半径和FOV转变为一个参数，简化了畸变处理的复杂度。</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">x</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">y</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">x</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">y</span> <span class="o">/=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">screen_to_lens_distance_meters</span><span class="p">;</span>
+
+    <span class="c1">// texture.size和offset是纹理的归一化系数，由FOV来决定，这个决定了纹理的铺满程度。所以FOV很关键，</span>
+    <span class="c1">// 一方面用于渲染，决定渲染的视角大小，另一方面又用于畸变处理，决定画面显示的大小以及畸变校正后画面的拉扯、变形等因素。</span>
+  
+    <span class="c1">// Tan-angle to texture coordinates</span>
+    <span class="c1">// clang-format off</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_left</span><span class="p">)</span> <span class="o">+</span> <span class="n">tanf</span><span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_right</span><span class="p">);</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_down</span><span class="p">)</span> <span class="o">+</span> <span class="n">tanf</span><span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_up</span><span class="p">);</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_left</span><span class="p">);</span>
+    <span class="n">l_values</span><span class="p">.</span><span class="n">texture</span><span class="p">.</span><span class="n">offset</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">tanf</span><span class="p">(</span><span class="o">-</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">fov</span><span class="p">.</span><span class="n">angle_down</span><span class="p">);</span>
+    <span class="c1">// clang-format on</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>上面就是整个Monado引擎畸变校正的流程，可以看出非常简洁和优美，代码逻辑非常清晰，这也是笔者重点推荐的原因。当然这个只是看到的开源算法实现，至于当前VR头显厂家的实现，可能也不尽相同，如高通的畸变校正，就使用外置的distortion mesh，将畸变参数的计算下放给了OEM厂家，不关心具体的计算过程，只需要提供最终的mesh映射表格即可，厂家tunning的灵活度就比较高。</p>
+
+<p>畸变tunning的过程比较繁琐，需要理论和经验结合，有时候光学厂家给出的参数也不一定准确，需要判断是光学参数的问题还是tunning的问题。有的畸变校正使用的是枕形校正，而有的又使用桶形校正，具体该使用哪种需要根据自己的平台和畸变校正的算法原理来确定。不过不管是枕形还是桶形，其本质上还是一回事，只要掌握了核心原理，都是很简单的，下图是在tunning过程中生成的各种mesh图形，包括了桶形畸变和枕形畸变，以及两者相互的转换关系。</p>
+
+<p><img src="/blog/vr-distortion/image04.gif" alt="畸变调优过程中的各种Mesh图形" />
+```</p>
+
+
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>
