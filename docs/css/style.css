@@ -43,9 +43,10 @@ header {
     top: 0;
     z-index: 1000;
     transition: background 0.3s ease;
+    height: 70px;
 }
 
-nav {
+header nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -68,7 +69,7 @@ nav {
     filter: drop-shadow(0 0 5px var(--primary-color));
 }
 
-.nav-links {
+header .nav-links {
     display: flex;
     list-style: none;
     gap: 1rem;
@@ -89,7 +90,7 @@ nav {
     text-shadow: 0 0 10px var(--primary-color);
 }
 
-.nav-right {
+header .nav-right {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -485,6 +486,7 @@ footer {
     justify-content: center;
     gap: 2rem;
     padding: 0 20px;
+    padding-top: 100px;
 }
 
 .sidebar {

@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to load and display a post
     const loadPost = async (post) => {
         const lang = localStorage.getItem('language') || 'en';
-                const path = lang === 'zh' ? post.content_url_cn : post.content_url;
+        const path = lang === 'zh' ? post.content_url_cn : post.content_url;
 
         try {
             const response = await fetch(path);
@@ -13,7 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Failed to fetch ${path}: ${response.statusText}`);
             }
             const html = await response.text();
-            blogContent.innerHTML = html;
+            
+            // Parse the HTML and extract only the content, removing Jekyll's wrapper
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract the main content, removing Jekyll's container
+            const content = doc.querySelector('.markdown-body') || doc.body;
+            
+            // If we found the markdown-body, use its innerHTML, otherwise use the whole body
+            blogContent.innerHTML = content.innerHTML;
+            
+            // Apply our custom styles to the blog content
+            blogContent.className = 'blog-content';
         } catch (error) { 
             console.error('Error loading post:', error);
             blogContent.innerHTML = '<p>Error loading post. Please check the console for details.</p>';
