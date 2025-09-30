@@ -1,191 +1,312 @@
 <!DOCTYPE html>
-<html lang="en-US">
-  <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monado Frame Prediction Analysis - XReality</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .blog-content h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .blog-content h2 {
+            color: var(--secondary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .blog-content h3 {
+            color: var(--text-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .blog-content p {
+            margin-bottom: 1rem;
+        }
+        .blog-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .blog-content code {
+            background: var(--bg-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .blog-content pre {
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .blog-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .blog-content th, .blog-content td {
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        .blog-content th {
+            background: rgba(10, 25, 47, 0.8);
+            color: #00c6ff;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .blog-content td {
+            background: rgba(10, 25, 47, 0.4);
+        }
+        .blog-content tr:nth-child(even) td {
+            background: rgba(10, 25, 47, 0.6);
+        }
 
-<!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>monado-android-prebuild</title>
-<meta name="generator" content="Jekyll v3.10.0" />
-<meta property="og:title" content="monado-android-prebuild" />
-<meta property="og:locale" content="en_US" />
-<link rel="canonical" href="http://localhost:4000/blog/frame-prediction/monado_frame_prediction-en.html" />
-<meta property="og:url" content="http://localhost:4000/blog/frame-prediction/monado_frame_prediction-en.html" />
-<meta property="og:site_name" content="monado-android-prebuild" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="monado-android-prebuild" />
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","headline":"monado-android-prebuild","url":"http://localhost:4000/blog/frame-prediction/monado_frame_prediction-en.html"}</script>
-<!-- End Jekyll SEO tag -->
+        /* Summary section specific styles */
+        .blog-content h2 {
+            margin-top: 2.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 198, 255, 0.3);
+        }
+        .blog-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #00c6ff;
+        }
+        .blog-content ul {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+        .blog-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="blog-content">
+        <h1>Monado Frame Prediction Analysis</h1>
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=edd44ed048ece5b0ecaaf0e558ad240926eef7b4">
-    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+        <p>The Monado Android version has relatively high frame latency. This article will analyze Monado's frame prediction mechanism and attempt to improve its latency.</p>
 
-<!-- Setup Google Analytics -->
+        <h2>Pose Acquisition Interface</h2>
 
+        <p>The device driver provides an interface to obtain predicted poses. All frame prediction in Monado is achieved by calling the following interface to get the pose at the desired time.</p>
 
+        <pre><code>/*!
+ * @brief Get relationship of a tracked device to the tracking origin
+ * space as the base space.
+ *
+ * It is the responsibility of the device driver to do any prediction,
+ * there are helper functions available for this.
+ *
+ * The timestamps are system monotonic timestamps, such as returned by
+ * os_monotonic_get_ns().
+ *
+ * @param[in] xdev           The device.
+ * @param[in] name           Some devices may have multiple poses on
+ *                           them, select the one using this field. For
+ *                           HMDs use @p XRT_INPUT_GENERIC_HEAD_POSE.
+ *                           For Unbounded Reference Space you can use
+ *                           @p XRT_INPUT_GENERIC_UNBOUNDED_SPACE_POSE
+ *                           to get the origin of that space.
+ * @param[in] at_timestamp_ns If the device can predict or has a history
+ *                            of positions, this is when the caller
+ *                            wants the pose to be from.
+ * @param[out] out_relation The relation read from the device.
+ *
+ * @see xrt_input_name
+ */
+xrt_result_t (*get_tracked_pose)(struct xrt_device *xdev,
+                                 enum xrt_input_name name,
+                                 int64_t at_timestamp_ns,
+                                 struct xrt_space_relation *out_relation);</code></pre>
 
-<!-- You can set your favicon here -->
-<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+        <p>This interface is typically called in two scenarios:</p>
+        <ul>
+            <li>APP obtains poses through IPC calls</li>
+            <li>Compositor obtains poses during composition</li>
+        </ul>
 
-<!-- end custom head snippets -->
+        <h3>APP obtains poses through IPC calls</h3>
 
-  </head>
-  <body>
-    <div class="container-lg px-3 my-5 markdown-body">
-      
-      <h1><a href="http://localhost:4000/">monado-android-prebuild</a></h1>
-      
+        <p>When rendering frames, the APP calls xrLocateSpace or xrLocateViews to obtain poses, while passing in the prediction time.</p>
+        <img src="blog/frame-prediction/app-frame-prediction.png" alt="app frame prediction">
 
-      <p>The Monado Android version has relatively high frame latency. This article will analyze Monado’s frame prediction mechanism and attempt to improve its latency.</p>
+        <p>Unity uses a multi-threaded model. The UnityMain thread calls the locateSpace interface to get the pose at the beginning of the frame. At this point, the prediction time is relatively long, about 42ms.</p>
 
-<h1 id="pose-acquisition-interface">Pose Acquisition Interface</h1>
+        <p>In the Render thread when submitting the frame, it obtains the pose again through locateView, with a prediction time of 29.7ms. This means that after 11ms of CPU processing time, it re-predicts the pose for frame submission, which also helps reduce latency. In other words, the render thread submits frames with a prediction time of about 30ms.</p>
+        <img src="blog/frame-prediction/11ms-between-2-prediction.png" alt="Unity prediction model">
 
-<p>The device driver provides an interface to obtain predicted poses. All frame prediction in Monado is achieved by calling the following interface to get the pose at the desired time.</p>
+        <p>For native applications like HelloXR, there is only one main thread, and pose acquisition is completed within a single thread.</p>
+        <img src="blog/frame-prediction/loclateViews-space.png" alt="HelloXR prediction model">
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="cm">/*!
-	 * @brief Get relationship of a tracked device to the tracking origin
-	 * space as the base space.
-	 *
-	 * It is the responsibility of the device driver to do any prediction,
-	 * there are helper functions available for this.
-	 *
-	 * The timestamps are system monotonic timestamps, such as returned by
-	 * os_monotonic_get_ns().
-	 *
-	 * @param[in] xdev           The device.
-	 * @param[in] name           Some devices may have multiple poses on
-	 *                           them, select the one using this field. For
-	 *                           HMDs use @p XRT_INPUT_GENERIC_HEAD_POSE.
-	 *                           For Unbounded Reference Space you can use
-	 *                           @p XRT_INPUT_GENERIC_UNBOUNDED_SPACE_POSE
-	 *                           to get the origin of that space.
-	 * @param[in] at_timestamp_ns If the device can predict or has a history
-	 *                            of positions, this is when the caller
-	 *                            wants the pose to be from.
-	 * @param[out] out_relation The relation read from the device.
-	 *
-	 * @see xrt_input_name
-	 */</span>
-	<span class="n">xrt_result_t</span> <span class="p">(</span><span class="o">*</span><span class="n">get_tracked_pose</span><span class="p">)(</span><span class="k">struct</span> <span class="n">xrt_device</span> <span class="o">*</span><span class="n">xdev</span><span class="p">,</span>
-	                                 <span class="k">enum</span> <span class="n">xrt_input_name</span> <span class="n">name</span><span class="p">,</span>
-	                                 <span class="kt">int64_t</span> <span class="n">at_timestamp_ns</span><span class="p">,</span>
-	                                 <span class="k">struct</span> <span class="n">xrt_space_relation</span> <span class="o">*</span><span class="n">out_relation</span><span class="p">);</span>
-</code></pre></div></div>
+        <h3>Compositor obtains poses during composition</h3>
 
-<p>This interface is typically called in two scenarios:</p>
-<ol>
-  <li>APP obtains poses through IPC calls</li>
-  <li>Compositor obtains poses during composition</li>
-</ol>
+        <img src="blog/frame-prediction/compositor-get-pose.png" alt="compositor prediction model">
 
-<h2 id="app-obtains-poses-through-ipc-calls">APP obtains poses through IPC calls</h2>
+        <p>Compositor render thread, prediction time 7.9ms</p>
+        <img src="blog/frame-prediction/compositor-prediction-time.png" alt="compositor prediction time">
 
-<p>When rendering frames, the APP calls xrLocateSpace or xrLocateViews to obtain poses, while passing in the prediction time.
-<img src="/blog/frame-prediction/app-frame-prediction.png" alt="app frame prediction" /></p>
+        <h2>Frame Pacing - Frame Time Management</h2>
 
-<p>Unity uses a multi-threaded model. The UnityMain thread calls the locateSpace interface to get the pose at the beginning of the frame. At this point, the prediction time is relatively long, about 42ms.</p>
+        <p>The Frame Pacing module controls frame rhythm/timing. Frames mainly have the following states:</p>
 
-<p>In the Render thread when submitting the frame, it obtains the pose again through locateView, with a prediction time of 29.7ms. This means that after 11ms of CPU processing time, it re-predicts the pose for frame submission, which also helps reduce latency. In other words, the render thread submits frames with a prediction time of about 30ms.
-<img src="/blog/frame-prediction/11ms-between-2-prediction.png" alt="Unity prediction model" /></p>
+        <h3>1. Sleep timing points</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Time variable</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Predicted sleep start</td>
+                    <td>f->when.predicted_ns</td>
+                    <td>Monado predicts when the CPU should enter sleep (based on historical frame data for power optimization)</td>
+                </tr>
+                <tr>
+                    <td>Actual wake time</td>
+                    <td>f->when.wait_woke_ns</td>
+                    <td>When the CPU is actually awakened (may be later than predicted due to system scheduling delays)</td>
+                </tr>
+            </tbody>
+        </table>
 
-<p>For native applications like HelloXR, there is only one main thread, and pose acquisition is completed within a single thread.
-<img src="/blog/frame-prediction/loclateViews-space.png" alt="HelloXR prediction model" /></p>
+        <h3>2. CPU processing stage (application logic)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Time variable</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CPU starts work</td>
+                    <td>cpu_start_ns</td>
+                    <td>Starts processing immediately after waking (wait_woke_ns + 1 to avoid time overlap)</td>
+                </tr>
+                <tr>
+                    <td>CPU finishes work</td>
+                    <td>f->when.begin_ns</td>
+                    <td>CPU completes frame data processing (such as application logic, submitting render commands)</td>
+                </tr>
+            </tbody>
+        </table>
 
-<h2 id="compositor-obtains-poses-during-composition">Compositor obtains poses during composition</h2>
+        <h3>3. GPU drawing stage</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Time variable</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GPU starts drawing</td>
+                    <td>f->when.begin_ns</td>
+                    <td>After CPU submits draw commands, GPU starts rendering</td>
+                </tr>
+                <tr>
+                    <td>GPU expected completion</td>
+                    <td>f->predicted_gpu_done_time_ns</td>
+                    <td>Monado predicts when GPU should complete rendering (used to determine if delayed)</td>
+                </tr>
+                <tr>
+                    <td>GPU actual completion</td>
+                    <td>f->when.delivered_ns</td>
+                    <td>When GPU actually completes rendering (if later than predicted, marked as "late")</td>
+                </tr>
+            </tbody>
+        </table>
 
-<p><img src="/blog/frame-prediction/compositor-get-pose.png" alt="compositor prediction model" /></p>
+        <h3>4. Wait stage (GPU synchronization)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Time variable</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Start waiting for GPU</td>
+                    <td>f->when.delivered_ns</td>
+                    <td>After GPU rendering completes, waiting for results to sync to display subsystem</td>
+                </tr>
+                <tr>
+                    <td>GPU final completion</td>
+                    <td>f->when.gpu_done_ns</td>
+                    <td>Final time when all GPU work (including display submission) is completed</td>
+                </tr>
+            </tbody>
+        </table>
 
-<p>Compositor render thread, prediction time 7.9ms
-<img src="/blog/frame-prediction/compositor-prediction-time.png" alt="compositor prediction time" /></p>
+        <img src="blog/frame-prediction/sleep-draw-wait.png" alt="sleep-draw-wait">
 
-<h1 id="frame-pacing---frame-time-management">Frame Pacing - Frame Time Management</h1>
+        <p>PA Sleep ----> oxr_xrWaitFrame</p>
+        <p>PA Draw --> Time duration from oxr_xrBeginFrame to oxr_xrEndFrame</p>
+        <img src="blog/frame-prediction/sleep-draw.png" alt="sleep-draw">
 
-<p>The Frame Pacing module controls frame rhythm/timing. Frames mainly have the following states:</p>
+        <p>oxr_xrEndFrame marks the end of draw</p>
+        <img src="blog/frame-prediction/draw.png" alt="end-draw">
 
-<ol>
-  <li>
-    <p>Sleep timing points
-Event | Time variable | Description
-— | — | —
-Predicted sleep start | f-&gt;when.predicted_ns | Monado predicts when the CPU should enter sleep (based on historical frame data for power optimization)
-Actual wake time | f-&gt;when.wait_woke_ns | When the CPU is actually awakened (may be later than predicted due to system scheduling delays)</p>
-  </li>
-  <li>
-    <p>CPU processing stage (application logic)
-Event | Time variable | Description
-— | — | —
-CPU starts work | cpu_start_ns | Starts processing immediately after waking (wait_woke_ns + 1 to avoid time overlap)
-CPU finishes work | f-&gt;when.begin_ns | CPU completes frame data processing (such as application logic, submitting render commands)</p>
-  </li>
-  <li>
-    <p>GPU drawing stage
-Event | Time variable | Description
-— | — | —
-GPU starts drawing | f-&gt;when.begin_ns | After CPU submits draw commands, GPU starts rendering
-GPU expected completion | f-&gt;predicted_gpu_done_time_ns | Monado predicts when GPU should complete rendering (used to determine if delayed)
-GPU actual completion | f-&gt;when.delivered_ns | When GPU actually completes rendering (if later than predicted, marked as “late”)</p>
-  </li>
-  <li>
-    <p>Wait stage (GPU synchronization)
-Event | Time variable | Description
-— | — | —
-Start waiting for GPU | f-&gt;when.delivered_ns | After GPU rendering completes, waiting for results to sync to display subsystem
-GPU final completion | f-&gt;when.gpu_done_ns | Final time when all GPU work (including display submission) is completed</p>
-  </li>
-</ol>
+        <p>PA wait is the time waiting for GPU drawing. After GPU drawing completes, the fence wakes up and wait ends. Note that this wait thread is named "unity main" but is actually the compositor waiter thread.</p>
+        <img src="blog/frame-prediction/wait.png" alt="wait">
 
-<p><img src="/blog/frame-prediction/sleep-draw-wait.png" alt="sleep-draw-wait" /></p>
+        <h3>Compositor frame synchronization</h3>
 
-<p>PA Sleep —-&gt; oxr_xrWaitFrame
-PA Draw –&gt; Time duration from oxr_xrBeginFrame to oxr_xrEndFrame
-<img src="/blog/frame-prediction/sleep-draw.png" alt="sleep-draw" /></p>
+        <p>The compositor has a similar process: PC sleep -> PC draw -> PC present, where present is the predicted screen scanout time.</p>
+        <img src="blog/frame-prediction/compositor_timeline.png" alt="compositor">
 
-<p>oxr_xrEndFrame marks the end of draw
-<img src="/blog/frame-prediction/draw.png" alt="end-draw" /></p>
+        <h2>Complete frame latency</h2>
 
-<p>PA wait is the time waiting for GPU drawing. After GPU drawing completes, the fence wakes up and wait ends. Note that this wait thread is named “unity main” but is actually the compositor waiter thread.
-<img src="/blog/frame-prediction/wait.png" alt="wait" /></p>
+        <p>The diagram below shows the entire process from when the application starts rendering a frame to submission for composition, and finally to screen display after composition.</p>
 
-<h2 id="compositor-frame-synchronization">Compositor frame synchronization</h2>
+        <p>The first flag to the second flag is from drawing to starting submission. The second to third flag is from submission to composition to screen display.</p>
 
-<p>The compositor has a similar process: PC sleep -&gt; PC draw -&gt; PC present, where present is the predicted screen scanout time.
-<img src="/blog/frame-prediction/compositor_timeline.png" alt="compositor" /></p>
+        <p>First flag: Frame start, CPU runs to prepare rendering data, calls xrt_device_get_tracked_pose interface for pose prediction. The xrt device driver prints a prediction time of 30ms.</p>
 
-<h1 id="complete-frame-latency">Complete frame latency</h1>
+        <p>Second flag: Compositor finishes displaying the previous frame and starts retrieving the currently submitted frame for composition.</p>
 
-<p>The diagram below shows the entire process from when the application starts rendering a frame to submission for composition, and finally to screen display after composition.</p>
+        <p>Third flag: Compositor completes composition of the new frame and finishes screen display. Using systrace measurement, the time from the first flag to the third flag is 30ms, matching the predicted display time.</p>
+        <img src="blog/frame-prediction/full-frame-delay.png" alt="full frame delay">
 
-<p>The first flag to the second flag is from drawing to starting submission. The second to third flag is from submission to composition to screen display.</p>
+        <h2>Summary</h2>
 
-<p>First flag: Frame start, CPU runs to prepare rendering data, calls xrt_device_get_tracked_pose interface for pose prediction. The xrt device driver prints a prediction time of 30ms.</p>
+        <p>For latency tuning, evaluation can be done from both subjective and objective aspects.</p>
 
-<p>Second flag: Compositor finishes displaying the previous frame and starts retrieving the currently submitted frame for composition.</p>
+        <h3>Subjective aspects:</h3>
+        <ul>
+            <li>If the image dragging sensation is strong, the latency is high and prediction time needs to be increased (this was the initial situation with Monado)</li>
+            <li>Run hello_xr and observe the cube in the center of the field of view - if there is ghosting, there is a prediction problem, likely due to frame jitter, such as one frame predicting longer and the next frame having inconsistent prediction duration. When the cube has no ghosting at all, the prediction is correct.</li>
+            <li>With correct latency, there should be no dizziness when turning left and right, and the image should be very responsive during rotation.</li>
+        </ul>
 
-<p>Third flag: Compositor completes composition of the new frame and finishes screen display. Using systrace measurement, the time from the first flag to the third flag is 30ms, matching the predicted display time.
-<img src="/blog/frame-prediction/full-frame-delay.png" alt="full frame delay" /></p>
-
-<h1 id="summary">Summary</h1>
-
-<p>For latency tuning, evaluation can be done from both subjective and objective aspects.</p>
-
-<p>Subjective aspects:</p>
-<ol>
-  <li>If the image dragging sensation is strong, the latency is high and prediction time needs to be increased (this was the initial situation with Monado)</li>
-  <li>Run hello_xr and observe the cube in the center of the field of view - if there is ghosting, there is a prediction problem, likely due to frame jitter, such as one frame predicting longer and the next frame having inconsistent prediction duration. When the cube has no ghosting at all, the prediction is correct.</li>
-  <li>With correct latency, there should be no dizziness when turning left and right, and the image should be very responsive during rotation.</li>
-</ol>
-
-<p>Objective aspects:
-Test MTP latency, such as using OptoFidelity® BUDDY for MTP measurement. Good results should show 0 latency.
-Detailed reference: https://www.optofidelity.com/insights/blogs/measuring-head-mounted-displays-hmd-motion-to-photon-mtp-latency</p>
-
-
-      
+        <h3>Objective aspects:</h3>
+        <p>Test MTP latency, such as using OptoFidelity® BUDDY for MTP measurement. Good results should show 0 latency.</p>
+        <p>Detailed reference: <a href="https://www.optofidelity.com/insights/blogs/measuring-head-mounted-displays-hmd-motion-to-photon-mtp-latency">https://www.optofidelity.com/insights/blogs/measuring-head-mounted-displays-hmd-motion-to-photon-mtp-latency</a></p>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
-    <script>anchors.add();</script>
-  </body>
+</body>
 </html>

@@ -43,7 +43,8 @@ const translations = {
         contact_title: "Start Your XR Journey",
         contact_subtitle: "Ready to experience the next-generation XReality solution? Contact us for technical support and customization services.",
         contact_cta: "Get Started",
-        footer_text: "© 2025 XReality. Based on open-source Monado engine, empowering the XR ecosystem."
+        footer_text: "© 2025 XReality. Based on open-source Monado engine, empowering the XR ecosystem.",
+        comments_title: "Comments"
     },
     zh: {
         title: "XReality - 基于 Monado 的完整 XR 解决方案",
@@ -89,7 +90,8 @@ const translations = {
         contact_title: "开启您的 XR 之旅",
         contact_subtitle: "准备好体验下一代 XReality 解决方案了吗？联系我们获取技术支持和定制服务。",
         contact_cta: "开始使用",
-        footer_text: "© 2025 XReality. 基于开源 Monado 引擎，赋能 XR 生态。"
+        footer_text: "© 2025 XReality. 基于开源 Monado 引擎，赋能 XR 生态。",
+        comments_title: "评论"
     }
 };
 

@@ -547,6 +547,39 @@ footer {
 
     .sidebar {
         position: static;
+    }
+}
+
+/* Comments Section Styles */
+.comments-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.comments-section h3 {
+    color: var(--primary-color);
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+#comments-container {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+}
+
+/* Utterances custom styling to match theme */
+.utterances {
+    max-width: 100% !important;
+    margin: 0 !important;
+}
         width: 100%;
         height: auto;
         overflow-y: visible;
