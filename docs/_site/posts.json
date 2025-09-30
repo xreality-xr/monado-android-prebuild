@@ -1,5 +1,12 @@
 [
   {
+    "title": "Monado Frame Prediction Analysis",
+    "author": "Monado",
+    "date": "2025-09-30",
+    "content_url": "blog/frame-prediction/monado_frame_prediction-en.html",
+    "content_url_cn": "blog/frame-prediction/monado_frame_prediction-cn.html"
+  },
+  {
     "title": "VR Optical Distortion Correction",
     "author": "Monado",
     "date": "2025-08-05",

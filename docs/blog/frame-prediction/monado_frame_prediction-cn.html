@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monado 帧预测分析 - XReality</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .blog-content h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .blog-content h2 {
+            color: var(--secondary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .blog-content h3 {
+            color: var(--text-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .blog-content p {
+            margin-bottom: 1rem;
+        }
+        .blog-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .blog-content code {
+            background: var(--bg-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .blog-content pre {
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .blog-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .blog-content th, .blog-content td {
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        .blog-content th {
+            background: rgba(10, 25, 47, 0.8);
+            color: #00c6ff;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .blog-content td {
+            background: rgba(10, 25, 47, 0.4);
+        }
+        .blog-content tr:nth-child(even) td {
+            background: rgba(10, 25, 47, 0.6);
+        }
+
+        /* Summary section specific styles */
+        .blog-content h2 {
+            margin-top: 2.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 198, 255, 0.3);
+        }
+        .blog-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #00c6ff;
+        }
+        .blog-content ul {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+        .blog-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="blog-content">
+        <h1>Monado 帧预测分析</h1>
+
+        <p>Monado Android 版本画面延迟比较高，本文将分析 Monado 的帧预测机制，并尝试改善其延迟。</p>
+
+        <h2>姿态获取接口</h2>
+
+        <p>设备驱动提供获取预测姿态的接口，Monado 的帧预测都是通过调用以下接口获取期望时间的姿态。</p>
+
+        <pre><code>/*!
+ * @brief Get relationship of a tracked device to the tracking origin
+ * space as the base space.
+ *
+ * It is the responsibility of the device driver to do any prediction,
+ * there are helper functions available for this.
+ *
+ * The timestamps are system monotonic timestamps, such as returned by
+ * os_monotonic_get_ns().
+ *
+ * @param[in] xdev           The device.
+ * @param[in] name           Some devices may have multiple poses on
+ *                           them, select the one using this field. For
+ *                           HMDs use @p XRT_INPUT_GENERIC_HEAD_POSE.
+ *                           For Unbounded Reference Space you can use
+ *                           @p XRT_INPUT_GENERIC_UNBOUNDED_SPACE_POSE
+ *                           to get the origin of that space.
+ * @param[in] at_timestamp_ns If the device can predict or has a history
+ *                            of positions, this is when the caller
+ *                            wants the pose to be from.
+ * @param[out] out_relation The relation read from the device.
+ *
+ * @see xrt_input_name
+ */
+xrt_result_t (*get_tracked_pose)(struct xrt_device *xdev,
+                                 enum xrt_input_name name,
+                                 int64_t at_timestamp_ns,
+                                 struct xrt_space_relation *out_relation);</code></pre>
+
+        <p>这个接口通常会在两种情况下调用：</p>
+        <ul>
+            <li>APP 通过 IPC 调用获取姿态</li>
+            <li>Compositor 在合成的时候获取姿态</li>
+        </ul>
+
+        <h3>APP 通过 IPC 调用获取姿态</h3>
+
+        <p>当渲染帧时，APP 会调用 xrLocateSpace 或 xrLocateViews 来获取姿态，同时会传入预测时间。</p>
+        <img src="blog/frame-prediction/app-frame-prediction.png" alt="app frame prediction">
+
+        <p>Unity 使用多线程模型。UnityMain 线程调用 locateSpace 接口，在帧开始时获取姿态。此时预测时间相对较长，大约 42ms。</p>
+
+        <p>在 Render 线程提交帧时，通过 locateView 再次获取姿态，预测时间为 29.7ms。这意味着在 CPU 阶段耗时 11ms 后，重新预测提交帧的姿态，这也有助于降低延迟。换句话说，渲染线程提交帧的预测时间大约为 30ms。</p>
+        <img src="blog/frame-prediction/11ms-between-2-prediction.png" alt="Unity prediction model">
+
+        <p>而对于原生应用如 HelloXR，只有一个主线程，姿态获取都在一个线程中完成。</p>
+        <img src="blog/frame-prediction/loclateViews-space.png" alt="HelloXR prediction model">
+
+        <h3>Compositor 在合成时获取姿态</h3>
+
+        <img src="blog/frame-prediction/compositor-get-pose.png" alt="compositor prediction model">
+
+        <p>Compositor 渲染线程，预测时间 7.9ms</p>
+        <img src="blog/frame-prediction/compositor-prediction-time.png" alt="compositor prediction time">
+
+        <h2>帧节奏 - 帧时间管理</h2>
+
+        <p>帧节奏模块控制着帧的节奏/时序。帧主要有以下状态：</p>
+
+        <h3>1. 睡眠时间点</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>事件</th>
+                    <th>时间变量</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>预测睡眠开始</td>
+                    <td>f->when.predicted_ns</td>
+                    <td>Monado 预测 CPU 应该进入休眠的时间（基于历史帧数据优化功耗）</td>
+                </tr>
+                <tr>
+                    <td>实际唤醒时间</td>
+                    <td>f->when.wait_woke_ns</td>
+                    <td>CPU 实际被唤醒的时间（可能因系统调度延迟晚于预测值）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2. CPU 处理阶段（应用逻辑）</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>事件</th>
+                    <th>时间变量</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CPU 开始工作</td>
+                    <td>cpu_start_ns</td>
+                    <td>唤醒后立即开始处理（wait_woke_ns + 1 避免时间重叠）</td>
+                </tr>
+                <tr>
+                    <td>CPU 结束工作</td>
+                    <td>f->when.begin_ns</td>
+                    <td>CPU 完成帧数据处理（如应用逻辑、提交渲染命令）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>3. GPU 绘制阶段</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>事件</th>
+                    <th>时间变量</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GPU 开始绘制</td>
+                    <td>f->when.begin_ns</td>
+                    <td>CPU 提交绘制命令后，GPU 开始渲染</td>
+                </tr>
+                <tr>
+                    <td>GPU 预期完成</td>
+                    <td>f->predicted_gpu_done_time_ns</td>
+                    <td>Monado 预测 GPU 应完成渲染的时间（用于判断是否延迟）</td>
+                </tr>
+                <tr>
+                    <td>GPU 实际完成</td>
+                    <td>f->when.delivered_ns</td>
+                    <td>GPU 实际完成渲染的时间（若晚于预测值，标记为 "late"）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>4. 等待阶段（GPU 同步）</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>事件</th>
+                    <th>时间变量</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>开始等待 GPU</td>
+                    <td>f->when.delivered_ns</td>
+                    <td>GPU 渲染完成后，等待结果同步到显示子系统</td>
+                </tr>
+                <tr>
+                    <td>GPU 最终完成</td>
+                    <td>f->when.gpu_done_ns</td>
+                    <td>GPU 所有工作（包括显示提交）完成的最终时间</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <img src="blog/frame-prediction/sleep-draw-wait.png" alt="sleep-draw-wait">
+
+        <p>PA Sleep ----> oxr_xrWaitFrame</p>
+        <p>PA Draw --> 从 oxr_xrBeginFrame 到 oxr_xrEndFrame 的时间长度</p>
+        <img src="blog/frame-prediction/sleep-draw.png" alt="sleep-draw">
+
+        <p>oxr_xrEndFrame 标记绘制结束</p>
+        <img src="blog/frame-prediction/draw.png" alt="end-draw">
+
+        <p>PA wait 是等待 GPU 绘制的时间。GPU 绘制完成后，fence 唤醒，wait 结束。注意这个 wait 线程名为 "unity main"，但实际上是 compositor waiter 线程。</p>
+        <img src="blog/frame-prediction/wait.png" alt="wait">
+
+        <h3>Compositor 帧同步</h3>
+
+        <p>Compositor 也有类似的过程：PC sleep -> PC draw -> PC present，其中 present 是预测的屏幕扫描时间。</p>
+        <img src="blog/frame-prediction/compositor_timeline.png" alt="compositor">
+
+        <h2>完整帧延迟</h2>
+
+        <p>下图显示了从应用程序开始渲染帧到提交合成，再到屏幕显示的整个过程。</p>
+
+        <p>从第一个标志到第二个标志是从绘制到开始提交。从第二个标志到第三个标志是从提交到合成再到屏幕显示。</p>
+
+        <p>第一个标志：帧开始，CPU 运行准备渲染数据，调用 xrt_device_get_tracked_pose 接口进行姿态预测。xrt 设备驱动打印的预测时间为 30ms。</p>
+
+        <p>第二个标志：Compositor 显示完上一帧，开始获取当前提交的帧进行合成。</p>
+
+        <p>第三个标志：Compositor 合成新帧，并完成屏幕显示。使用 systrace 测量，从第一个标志到第三个标志的时间为 30ms，预测符合实际显示时间。</p>
+        <img src="blog/frame-prediction/full-frame-delay.png" alt="full frame delay">
+
+        <h2 style="margin-top: 2.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(0, 198, 255, 0.3);">总结</h2>
+
+        <p>关于延迟调优，可以从主观和客观两个方面进行评估。</p>
+
+        <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; color: #00c6ff;">主观方面：</h3>
+        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem; line-height: 1.5;">如果图像拖拽感较强，说明延迟较大，需要增加预测时间（这是 Monado 最初的情况）</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.5;">运行 hello_xr 并观察视野中心的立方体 - 如果有重影，说明预测有问题，可能是由于帧抖动，比如一帧预测时间较长，下一帧预测时间不一致。当立方体完全没有重影时，预测就正确了。</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.5;">正确的延迟下，左右转动时不应感到任何眩晕，转动时图像应该非常灵敏。</li>
+        </ul>
+
+        <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; color: #00c6ff;">客观方面：</h3>
+        <p style="margin-bottom: 1rem;">测试 MTP 延迟，例如使用 OptoFidelity® BUDDY 进行 MTP 测量。良好的结果应该是 0 延迟。</p>
+        <p>详细参考：<a href="https://www.optofidelity.com/insights/blogs/measuring-head-mounted-displays-hmd-motion-to-photon-mtp-latency">https://www.optofidelity.com/insights/blogs/measuring-head-mounted-displays-hmd-motion-to-photon-mtp-latency</a></p>
+    </div>
+</body>
+</html>

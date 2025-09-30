@@ -88,16 +88,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle language change to reload the article
     window.addEventListener('languageChanged', (e) => {
         const currentHash = window.location.hash;
-        if (currentHash) {
-            fetch('posts.json')
-                .then(response => response.json())
-                .then(posts => {
+        fetch('posts.json')
+            .then(response => response.json())
+            .then(posts => {
+                let postToLoad = posts[0]; // Default to the first post
+
+                if (currentHash) {
                     const postTitleFromHash = currentHash.substring(1).replace(/-/g, ' ');
                     const foundPost = posts.find(p => p.title.toLowerCase().replace(/\s+/g, ' ') === postTitleFromHash.toLowerCase());
                     if (foundPost) {
-                        loadPost(foundPost);
+                        postToLoad = foundPost;
                     }
-                });
-        }
+                }
+
+                loadPost(postToLoad);
+            });
     });
 });
