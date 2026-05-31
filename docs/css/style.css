@@ -199,6 +199,29 @@ header .nav-right {
     box-shadow: 0 0 30px rgba(0, 198, 255, 0.6);
 }
 
+/* Overview Section */
+.overview {
+    background: var(--dark-bg);
+    padding: 80px 0 60px;
+}
+
+.overview-diagram {
+    text-align: center;
+}
+
+.overview-diagram img {
+    width: 100%;
+    max-width: 900px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.overview-diagram img:hover {
+    transform: scale(1.01);
+}
+
 /* Features Section */
 .features {
     background: var(--dark-bg);
@@ -277,6 +300,72 @@ header .nav-right {
 .feature-card p {
     color: var(--subtle-text-color);
     line-height: 1.8;
+}
+
+/* Feature list styling */
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-list li {
+    position: relative;
+    padding: 0.35rem 0 0.35rem 1.4rem;
+    color: var(--subtle-text-color);
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+.feature-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    box-shadow: 0 0 6px rgba(0, 198, 255, 0.4);
+}
+
+.highlight-card .feature-list li::before {
+    width: 9px;
+    height: 9px;
+    box-shadow: 0 0 8px rgba(0, 198, 255, 0.6);
+}
+
+.feature-list-label {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-right: 0.3rem;
+}
+
+/* Highlight feature cards */
+.highlight-card {
+    background: linear-gradient(135deg, rgba(0, 198, 255, 0.08), rgba(0, 114, 255, 0.05));
+    border-color: rgba(0, 198, 255, 0.35);
+}
+
+.highlight-card::before {
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.highlight-card .feature-icon {
+    animation: pulse-icon 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }
 
 /* Advantages Section */

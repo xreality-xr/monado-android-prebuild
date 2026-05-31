@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1930" />
+      <stop offset="100%" stop-color="#050816" />
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00c6ff" />
+      <stop offset="100%" stop-color="#0072ff" />
+    </linearGradient>
+    <linearGradient id="blueGradH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0072ff" />
+      <stop offset="100%" stop-color="#00c6ff" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(0,198,255,0.12)" />
+      <stop offset="100%" stop-color="rgba(0,114,255,0.06)" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="softShadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="520" rx="16" fill="url(#bgGrad)" />
+  <rect width="900" height="520" rx="16" fill="none" stroke="rgba(0,198,255,0.2)" stroke-width="1.5" />
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" fill="#00c6ff" font-size="18" font-weight="700" letter-spacing="2" filter="url(#glow)">XRUNTIME ARCHITECTURE OVERVIEW</text>
+
+  <!-- ===== Layer 1: Application Layer ===== -->
+  <rect x="40" y="55" width="820" height="60" rx="10" fill="rgba(0,114,255,0.15)" stroke="rgba(0,198,255,0.3)" stroke-width="1" />
+  <text x="60" y="78" fill="#00c6ff" font-size="11" font-weight="600" letter-spacing="1">APPLICATION LAYER</text>
+  <rect x="140" y="70" width="150" height="32" rx="6" fill="rgba(0,198,255,0.1)" stroke="rgba(0,198,255,0.4)" stroke-width="1" />
+  <text x="215" y="91" text-anchor="middle" fill="#e0e0e0" font-size="12">OpenXR Applications</text>
+  <rect x="320" y="70" width="150" height="32" rx="6" fill="rgba(0,198,255,0.1)" stroke="rgba(0,198,255,0.4)" stroke-width="1" />
+  <text x="395" y="91" text-anchor="middle" fill="#e0e0e0" font-size="12">Android Native Apps</text>
+  <rect x="500" y="70" width="150" height="32" rx="6" fill="rgba(0,198,255,0.1)" stroke="rgba(0,198,255,0.4)" stroke-width="1" />
+  <text x="575" y="91" text-anchor="middle" fill="#e0e0e0" font-size="12">Overlay Sessions</text>
+
+  <!-- Arrow down -->
+  <line x1="450" y1="115" x2="450" y2="135" stroke="url(#blueGrad)" stroke-width="2" />
+  <polygon points="444,133 450,142 456,133" fill="#00c6ff" />
+
+  <!-- ===== Layer 2: OpenXR API ===== -->
+  <rect x="40" y="145" width="820" height="50" rx="10" fill="rgba(0,198,255,0.08)" stroke="rgba(0,198,255,0.35)" stroke-width="1.5" />
+  <text x="450" y="175" text-anchor="middle" fill="url(#blueGrad)" font-size="14" font-weight="700" letter-spacing="3" filter="url(#glow)">OPENXR API</text>
+
+  <!-- Arrow down -->
+  <line x1="450" y1="195" x2="450" y2="215" stroke="url(#blueGrad)" stroke-width="2" />
+  <polygon points="444,213 450,222 456,213" fill="#00c6ff" />
+
+  <!-- ===== Layer 3: XReality Runtime (Main Box) ===== -->
+  <rect x="40" y="225" width="820" height="175" rx="12" fill="rgba(0,198,255,0.04)" stroke="rgba(0,198,255,0.25)" stroke-width="1.5" />
+  <text x="60" y="248" fill="#00c6ff" font-size="11" font-weight="600" letter-spacing="1">XREALITY RUNTIME (MONADO-BASED)</text>
+
+  <!-- Sub-module 1: Rendering -->
+  <rect x="60" y="260" width="230" height="125" rx="8" fill="rgba(10,25,47,0.75)" stroke="rgba(0,198,255,0.3)" stroke-width="1" filter="url(#softShadow)" />
+  <rect x="60" y="260" width="230" height="4" rx="2" fill="url(#blueGrad)" />
+  <text x="175" y="284" text-anchor="middle" fill="#00c6ff" font-size="13" font-weight="600">Rendering Pipeline</text>
+  <text x="75" y="305" fill="#a0a0a0" font-size="11">  Single Buffer Rendering</text>
+  <text x="75" y="323" fill="#a0a0a0" font-size="11">  Spatiotemporal Reprojection</text>
+  <text x="75" y="341" fill="#a0a0a0" font-size="11">  Distortion Correction</text>
+  <text x="75" y="359" fill="#a0a0a0" font-size="11">  Dual Display Modes</text>
+  <text x="75" y="377" fill="#a0a0a0" font-size="11">  Multi-Process Architecture</text>
+
+  <!-- Sub-module 2: Tracking -->
+  <rect x="310" y="260" width="250" height="125" rx="8" fill="rgba(10,25,47,0.75)" stroke="rgba(0,198,255,0.3)" stroke-width="1" filter="url(#softShadow)" />
+  <rect x="310" y="260" width="250" height="4" rx="2" fill="url(#blueGrad)" />
+  <text x="435" y="284" text-anchor="middle" fill="#00c6ff" font-size="13" font-weight="600">Tracking &amp; Interaction</text>
+  <text x="325" y="305" fill="#a0a0a0" font-size="11">  3DOF Pose Fusion + IMU Calibration</text>
+  <text x="325" y="323" fill="#a0a0a0" font-size="11">  6DOF SLAM (1/2/4 Camera)</text>
+  <text x="325" y="341" fill="#a0a0a0" font-size="11">  Microsecond Camera Sync</text>
+  <text x="325" y="359" fill="#a0a0a0" font-size="11">  21-Joint Hand Gesture Tracking</text>
+  <text x="325" y="377" fill="#a0a0a0" font-size="11">  Joint Point Visualization</text>
+
+  <!-- Sub-module 3: Platform -->
+  <rect x="580" y="260" width="260" height="125" rx="8" fill="rgba(10,25,47,0.75)" stroke="rgba(0,198,255,0.3)" stroke-width="1" filter="url(#softShadow)" />
+  <rect x="580" y="260" width="260" height="4" rx="2" fill="url(#blueGrad)" />
+  <text x="710" y="284" text-anchor="middle" fill="#00c6ff" font-size="13" font-weight="600">Platform &amp; Debug</text>
+  <text x="595" y="305" fill="#a0a0a0" font-size="11">  SOC GPU Optimization (Qualcomm)</text>
+  <text x="595" y="323" fill="#a0a0a0" font-size="11">  Low CPU &amp; Power Consumption</text>
+  <text x="595" y="341" fill="#a0a0a0" font-size="11">  Perfetto Systrace Profiling</text>
+  <text x="595" y="359" fill="#a0a0a0" font-size="11">  Performance Tuning &amp; Diagnostics</text>
+  <text x="595" y="377" fill="#a0a0a0" font-size="11">  Android Compatibility Layer</text>
+
+  <!-- Arrow down -->
+  <line x1="450" y1="400" x2="450" y2="420" stroke="url(#blueGrad)" stroke-width="2" />
+  <polygon points="444,418 450,427 456,418" fill="#00c6ff" />
+
+  <!-- ===== Layer 4: Hardware / Platform ===== -->
+  <rect x="40" y="430" width="820" height="70" rx="10" fill="rgba(0,114,255,0.12)" stroke="rgba(0,198,255,0.3)" stroke-width="1" />
+  <text x="60" y="453" fill="#00c6ff" font-size="11" font-weight="600" letter-spacing="1">HARDWARE / PLATFORM</text>
+  <rect x="70" y="460" width="120" height="28" rx="6" fill="rgba(0,198,255,0.08)" stroke="rgba(0,198,255,0.35)" stroke-width="1" />
+  <text x="130" y="479" text-anchor="middle" fill="#e0e0e0" font-size="11">GPU / Adreno</text>
+  <rect x="210" y="460" width="120" height="28" rx="6" fill="rgba(0,198,255,0.08)" stroke="rgba(0,198,255,0.35)" stroke-width="1" />
+  <text x="270" y="479" text-anchor="middle" fill="#e0e0e0" font-size="11">Camera Array</text>
+  <rect x="350" y="460" width="120" height="28" rx="6" fill="rgba(0,198,255,0.08)" stroke="rgba(0,198,255,0.35)" stroke-width="1" />
+  <text x="410" y="479" text-anchor="middle" fill="#e0e0e0" font-size="11">IMU Sensors</text>
+  <rect x="490" y="460" width="120" height="28" rx="6" fill="rgba(0,198,255,0.08)" stroke="rgba(0,198,255,0.35)" stroke-width="1" />
+  <text x="550" y="479" text-anchor="middle" fill="#e0e0e0" font-size="11">Display Panel</text>
+  <rect x="630" y="460" width="120" height="28" rx="6" fill="rgba(0,198,255,0.08)" stroke="rgba(0,198,255,0.35)" stroke-width="1" />
+  <text x="690" y="479" text-anchor="middle" fill="#e0e0e0" font-size="11">Android OS</text>
+
+  <!-- Side metrics -->
+  <rect x="780" y="460" width="60" height="28" rx="6" fill="rgba(0,198,255,0.08)" stroke="rgba(0,198,255,0.35)" stroke-width="1" />
+  <text x="810" y="479" text-anchor="middle" fill="#e0e0e0" font-size="11">DSP</text>
+</svg>
